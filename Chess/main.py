@@ -1,11 +1,11 @@
 import pygame as p
 from Chess import ChessEngine
 p.display.set_caption('Шахматы')
-WIN_SIZE = 800, 800
+WIN_SIZE = 630, 630
 SIZE = 600
 DIMENSION = 8
 SQ_SIZE = SIZE // DIMENSION
-FPS = 15
+FPS = 40
 IMAGES = {}
 LIGHTBLUE = (132,196,192)
 BLUE = (0,86,143)
@@ -13,12 +13,18 @@ WHITE = (255,255,255)
 BACKGROUND = (230,96,114)
 LTRS = 'АБВГДЕЖЗИЙКЛМНОПРСТ'
 COLLORS = [BLUE, LIGHTBLUE]
+ranksToRows = { '1':7, "2":6, "3":5, "4":4,
+                "5":3, "6":2, "7":1, "8": 0}
+rowsToRanks = {v: k for k, v in ranksToRows.items()}
+filesToCols = { 'А':0, "Б":1, "В":2, "Г":3,
+                "Д":4, "Е":5, "Ж":6, "З": 7}
+colsToFiles = {v: k for k, v in filesToCols.items()}
 n_lines = p.Surface((SQ_SIZE * SQ_SIZE, SQ_SIZE // 2))
 n_rows = p.Surface((SQ_SIZE // 2, DIMENSION * SQ_SIZE))
 fields = p.Surface((DIMENSION * SQ_SIZE, DIMENSION * SQ_SIZE))
 boardSur = p.Surface((
-    2*n_rows.get_width() + fields.get_width(),
-    2*n_lines.get_height() + fields.get_height()
+    (2*n_rows.get_width() + fields.get_width()) + 27,
+    (2*n_lines.get_height() + fields.get_height()) +27
 ))
 
 def load_Images():
@@ -34,32 +40,47 @@ def main():
     screen.fill(BACKGROUND)
     clock = p.time.Clock()
     gs = ChessEngine.GameState()
+    validMoves = gs.getValidMoves()
+    moveMade = False
     load_Images()
+    # location = []
     running = True
-    # sqSelected = input()
-    # sqAimed = input()
     sqSelected = ()
-    playerClicks = []
+    playerInputs = []
+
     while running:
         for e in p.event.get():
             if e.type == p.QUIT:
                 running = False
-            elif e.type == p.MOUSEBUTTONDOWN:
+            elif e.type == p.MOUSEBUTTONDOWN: # Реализация ходов через клики
                 location = p.mouse.get_pos()
                 col = location[0] // SQ_SIZE
                 row = location[1] // SQ_SIZE
                 if sqSelected == (row, col): # Пользователь нажал на одну и ту же клетку 2 раза
                     sqSelected = () # отмена выбора
-                    playerClicks = []
+                    playerInputs = []
                 else:
                     sqSelected = (row, col)
-                    playerClicks.append(sqSelected)
-                if len(playerClicks) == 2: #После второго клика
-                    move = ChessEngine.Move(playerClicks[0], playerClicks[1], gs.board)
+                    playerInputs.append(sqSelected)
+                if len(playerInputs) == 2: #После второго клика
+                    move = ChessEngine.Move(playerInputs[0], playerInputs[1], gs.board)
                     print(move.getChessNotation())
-                    gs.makeMove(move)
+                    if move in validMoves:
+                        gs.makeMove(move)
+                        moveMade = True
                     sqSelected = ()
-                    playerClicks = []
+                    playerInputs = []
+
+        if moveMade:
+            validMoves = gs.getValidMoves()
+            moveMade = False
+
+        # if moveMade == False:
+        #     pass
+        #     FirstSqInput = InputSq()
+        #     SecondSqInput = InputSq()
+        #     playerInputs = [FirstSqInput, SecondSqInput]
+
 
         DrawGameState(screen, gs)
         clock.tick(FPS)
@@ -69,6 +90,11 @@ def DrawGameState(screen, gs):
     bliting(screen, gs)
     DrawBoard(screen)
     DrawFont(screen)
+
+
+# def InputSq():
+# https://translated.turbopages.org/proxy_u/en-ru.ru.7e06f8d0-64207a1e-7c2a528a-74722d776562/https/www.geeksforgeeks.org/how-to-create-a-text-input-box-with-pygame/
+
 
 
 def DrawBoard(screen):
@@ -106,9 +132,9 @@ def DrawPieces(fields, board):
 
 def bliting(screen, gs):
     DrawPieces(fields, gs.board)
-    boardSur.blit(n_rows, (0, n_lines.get_height()))
+    # boardSur.blit(n_rows, (0, n_lines.get_height()))
     boardSur.blit(n_rows, (n_rows.get_width() + fields.get_width(), n_lines.get_height()))
-    boardSur.blit(n_lines, (n_rows.get_width(), 0))
+    # boardSur.blit(n_lines, (n_rows.get_width(), 0))
     boardSur.blit(n_lines, (n_rows.get_width(), n_rows.get_width() + fields.get_width()))
     boardSur.blit(fields, (n_rows.get_width(), n_lines.get_height()))
     screen.blit(boardSur, (
