@@ -36,10 +36,31 @@ def main():
     gs = ChessEngine.GameState()
     load_Images()
     running = True
+    # sqSelected = input()
+    # sqAimed = input()
+    sqSelected = ()
+    playerClicks = []
     while running:
         for e in p.event.get():
             if e.type == p.QUIT:
                 running = False
+            elif e.type == p.MOUSEBUTTONDOWN:
+                location = p.mouse.get_pos()
+                col = location[0] // SQ_SIZE
+                row = location[1] // SQ_SIZE
+                if sqSelected == (row, col): # Пользователь нажал на одну и ту же клетку 2 раза
+                    sqSelected = () # отмена выбора
+                    playerClicks = []
+                else:
+                    sqSelected = (row, col)
+                    playerClicks.append(sqSelected)
+                if len(playerClicks) == 2: #После второго клика
+                    move = ChessEngine.Move(playerClicks[0], playerClicks[1], gs.board)
+                    print(move.getChessNotation())
+                    gs.makeMove(move)
+                    sqSelected = ()
+                    playerClicks = []
+
         DrawGameState(screen, gs)
         clock.tick(FPS)
         p.display.flip()
@@ -94,15 +115,6 @@ def bliting(screen, gs):
         (WIN_SIZE[0] - boardSur.get_width()) // 2,
         (WIN_SIZE[1] - boardSur.get_height()) // 2
     ))
-    
-
-# def DrawPieces(fields, board):
-#     for r in range(DIMENSION):
-#         for c in range(DIMENSION):
-#             piece = board[r][c]
-#             if piece != "--":
-#                 fields.blit(IMAGES[piece], p.Rect(c* SQ_SIZE, r* SQ_SIZE, SQ_SIZE, SQ_SIZE))
-#
 
 if __name__ == "__main__":
     main()
