@@ -1,4 +1,5 @@
 import pygame as p
+from Chess import screenshoter
 from Chess import ChessEngine
 p.display.set_caption('Шахматы')
 WIN_SIZE = 630, 630
@@ -13,6 +14,7 @@ WHITE = (255,255,255)
 BACKGROUND = (230,96,114)
 LTRS = 'АБВГДЕЖЗИЙКЛМНОПРСТ'
 COLLORS = [BLUE, LIGHTBLUE]
+screen = p.display.set_mode(WIN_SIZE)
 ranksToRows = { '1':7, "2":6, "3":5, "4":4,
                 "5":3, "6":2, "7":1, "8": 0}
 rowsToRanks = {v: k for k, v in ranksToRows.items()}
@@ -36,7 +38,6 @@ def load_Images():
 
 def main():
     p.init()
-    screen = p.display.set_mode(WIN_SIZE)
     screen.fill(BACKGROUND)
     clock = p.time.Clock()
     gs = ChessEngine.GameState()
@@ -92,8 +93,12 @@ def DrawGameState(screen, gs):
     DrawFont(screen)
 
 
-# def InputSq():
-# https://translated.turbopages.org/proxy_u/en-ru.ru.7e06f8d0-64207a1e-7c2a528a-74722d776562/https/www.geeksforgeeks.org/how-to-create-a-text-input-box-with-pygame/
+# def handler(event, context):
+
+
+def DoScreenshot():
+    screenshoter.game_screenshot.making_screenshot = True
+
 
 
 
