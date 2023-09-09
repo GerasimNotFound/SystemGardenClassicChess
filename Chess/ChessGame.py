@@ -1,5 +1,4 @@
 import pygame as p
-from Chess import screenshoter
 from Chess import ChessEngine
 p.display.set_caption('Шахматы')
 WIN_SIZE = 630, 630
