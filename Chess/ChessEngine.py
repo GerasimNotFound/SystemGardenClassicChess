@@ -18,8 +18,8 @@ class GameState():
                               }
         self.whiteToMove = True
         self.moveLog = []
-        self.whiteKingLocation = (7,4)
-        self.blackKingLocation = (0,4)
+        self.whiteKingLocation = (7, 4)
+        self.blackKingLocation = (0, 4)
         self.inCheck = False
         self.pins = []
         self.checks = []
@@ -66,7 +66,7 @@ class GameState():
                     validSquares = [(checkRow,checkCol)]
                 else:
                     for i in range(1,8):
-                        validSquare = (kingRow + check[2]*i, kingCol + check[3]*i)
+                        validSquare = (kingRow + check[2] * i, kingCol + check[3] * i)
                         validSquares.append(validSquare)
                         if validSquare[0] == checkRow and validSquare[1] == checkCol:
                             break
@@ -148,8 +148,10 @@ class GameState():
                             else:
                                 pins.append(possiblePin)
                                 break
-                    else:
-                        break
+                        else:
+                            break
+                else:
+                    break
         knightMoves = ((-2,-1), (-2,1), (-1,-2), (-1,2), (1,-2), (1,2), (2,-1), (2,1))
         for m in knightMoves:
             endRow = startRow + m[0]
