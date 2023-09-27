@@ -12,7 +12,7 @@ BLUE = (0,86,143)
 WHITE = (255,255,255)
 BACKGROUND = (230,96,114)
 LTRS = 'ABCDEFGH'
-COLLORS = [BLUE, LIGHTBLUE]
+colors = [BLUE, LIGHTBLUE]
 screen = p.display.set_mode(WIN_SIZE)
 ranksToRows = { '1':7, "2":6, "3":5, "4":4,
                 "5":3, "6":2, "7":1, "8": 0}
@@ -76,26 +76,43 @@ def main():
                     gs.undoMove()
                     moveMade = True
         if moveMade:
+            # animateMove(gs.moveLog[-1], screen, gs.board, clock)
             validMoves = gs.getValidMoves()
             moveMade = False
 
-        DrawGameState(screen, gs)
+        DrawGameState(screen, gs, validMoves, sqSelected)
         clock.tick(FPS)
         p.display.flip()
 
-def DrawGameState(screen, gs):
+
+def highlightSquares(screen, gs, validMoves, sqSelected):
+    if sqSelected != ():
+        r,c = sqSelected
+        if gs.board[r][c][0] == ('w' if gs.whiteToMove else 'b'):
+            s = p.Surface((SQ_SIZE, SQ_SIZE))
+            s.set_alpha(100)
+            s.fill(p.Color('pink'))
+            screen.blit(s, (c*SQ_SIZE, r*SQ_SIZE))
+            s.fill(p.Color('yellow'))
+            for move in validMoves:
+                if move.startRow == r and move.startCol == c:
+                    screen.blit(s, (SQ_SIZE*move.endCol, SQ_SIZE*move.endRow))
+
+def DrawGameState(screen, gs,validMoves,sqSelected):
     bliting(screen, gs)
-    DrawBoard(screen)
+    drawBoard(screen)
+    highlightSquares(screen,gs,validMoves,sqSelected)
     DrawFont(screen)
 
 
-def DrawBoard(screen):
+def drawBoard(screen):
+    global colors
     is_even_qty = (DIMENSION % 2 == 0)
     cell_color_index = 1 if (is_even_qty) else 0
     for y in range(DIMENSION):
         for x in range(DIMENSION):
             cell = p.Surface((SQ_SIZE, SQ_SIZE))
-            cell.fill(COLLORS[cell_color_index])
+            cell.fill(colors[cell_color_index])
             fields.blit(cell, (x * SQ_SIZE, y * SQ_SIZE))
             cell_color_index ^= True
         cell_color_index = cell_color_index ^ True if (is_even_qty) else cell_color_index
@@ -133,6 +150,31 @@ def bliting(screen, gs):
         (WIN_SIZE[0] - boardSur.get_width()) // 2,
         (WIN_SIZE[1] - boardSur.get_height()) // 2
     ))
+
+# def animateMove(move, screen, board,clock):
+#     global colors
+#     dR = move.endRow - move.startRow
+#     dC = move.endCol - move.startCol
+#     framesPerSquare = 2
+#     frameCount = (abs(dR) + abs(dC)) * framesPerSquare
+#     for frame in range(frameCount + 1):
+#         r,c = (move.startRow + dR*frame/frameCount, move.startCol + dC*frame/frameCount)
+#         drawBoard(screen)
+#         DrawPieces(screen, board)
+#
+#         color = colors[(move.endRow + move.endCol) % 2]
+#         endSquare = p.Rect(move.endCol * SQ_SIZE, move.endRow*SQ_SIZE,SQ_SIZE,SQ_SIZE)
+#         p.draw.rect(screen,color,endSquare)
+#
+#         if move.pieceCaptured != '--':
+#             screen.blit(IMAGES[move.pieceCaptured],endSquare)
+#
+#         screen.blit(IMAGES[move.pieceMoved], p.Rect(c*SQ_SIZE, r*SQ_SIZE, SQ_SIZE, SQ_SIZE))
+#         p.display.flip()
+#         clock.tick(40)
+
+
+
 
 if __name__ == "__main__":
     main()
