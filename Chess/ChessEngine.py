@@ -16,6 +16,8 @@ class GameState():
                               'Q': self.getQueenMoves,
                               'K': self.getKingMoves
                               }
+        self.checkMate = False
+        self.staleMate = False
         self.whiteToMove = True
         self.moveLog = []
         self.whiteKingLocation = (7, 4)
@@ -178,6 +180,17 @@ class GameState():
             self.getCastleMoves(self.whiteKingLocation[0], self.whiteKingLocation[1], moves)
         else:
             self.getCastleMoves(self.blackKingLocation[0], self.blackKingLocation[1], moves)
+
+        if len(moves) == 0:
+            if self.inCheck:
+                self.checkMate = True
+            elif not self.inCheck:
+                self.staleMate = True
+
+        else:
+            self.checkMate = False
+            self.staleMate = False
+
 
         self.enpassantPossible = tempEnpassantPossible
         self.currentCastlingRight = tempCastleRights
