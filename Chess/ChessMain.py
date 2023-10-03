@@ -85,6 +85,7 @@ def main():
                     gs.undoMove()
                     moveMade = True
                     animate = False
+                    gameOver = False
         #   ИИ ходы
         if not gameOver and not humanTurn:
             AIMove = SmartMoveFinder.findBestMove(gs,validMoves)
