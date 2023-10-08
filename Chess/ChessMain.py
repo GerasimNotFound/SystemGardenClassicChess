@@ -86,9 +86,17 @@ def main():
                     moveMade = True
                     animate = False
                     gameOver = False
+                if e.key == p.K_r:
+                    gs = ChessEngine.GameState()
+                    validMoves = gs.getValidMoves()
+                    sqSelected = ()
+                    playerClicks = []
+                    moveMade = False
+                    animate = False
+                    gameOver = False
         #   ИИ ходы
         if not gameOver and not humanTurn:
-            AIMove = SmartMoveFinder.findBestMove(gs,validMoves)
+            AIMove = SmartMoveFinder.findBestMoveMinMax(gs,validMoves)
             if AIMove is None:
                 AIMove = SmartMoveFinder.findRandomMove(validMoves)
             gs.makeMove(AIMove)
