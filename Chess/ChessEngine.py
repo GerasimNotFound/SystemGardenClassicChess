@@ -23,7 +23,6 @@ class GameState():
         self.repeat = False
         self.whiteToMove = True
         self.moveLog = []
-        self.history = []
         self.whiteKingLocation = (7, 4)
         self.blackKingLocation = (0, 4)
         self.inCheck = False
@@ -114,7 +113,6 @@ class GameState():
         self.checkMate = False
         self.staleMate = False
         self.repeat = False
-        del self.history[-1]
 
 
 

@@ -10,10 +10,11 @@ DIMENSION = 8
 SQ_SIZE = SIZE // DIMENSION
 FPS = 40
 IMAGES = {}
+IMAGESFORSTART = {}
 LIGHTBLUE = (132,196,192)
 BLUE = (0,86,143)
 WHITE = (255,255,255)
-BACKGROUND = (230,96,32)
+BACKGROUND = "GRAY"
 MOVE_LOG_PANEL_WIDTH = 250
 MOVE_LOG_PANEL_HEIGHT = HEIGHT
 LTRS = 'ABCDEFGH'
@@ -32,21 +33,28 @@ boardSur = p.Surface((
     (2*n_rows.get_width() + fields.get_width()) + 27,
     (2*n_lines.get_height() + fields.get_height()) +27
 ))
+RECT_WIDTH = 200
+RECT_HEIGHT = 100
+RECT_X = (WIDTH - RECT_WIDTH) // 2
+RECT_Y = (HEIGHT - RECT_HEIGHT) // 2
 
 def load_Images():
     pieces = ['wp', 'wR', 'wN', 'wB', 'wK', 'wQ', 'bp', 'bR', 'bN', 'bB', 'bK', 'bQ']
+    piecesForStart = ["wQ","bQ"]
     for piece in pieces:
         IMAGES[piece] = p.transform.scale(p.image.load("./Chess/images/" + piece + ".png"), (SQ_SIZE, SQ_SIZE))
+    for pieceForStart in piecesForStart:
+        IMAGESFORSTART[pieceForStart] = p.transform.scale(p.image.load("./Chess/images/" + pieceForStart + ".png"), (WIDTH //4*3 -30, HEIGHT//4*3))
 
 
 
 def main():
     p.init()
-    screen.fill(BACKGROUND)
     moveLogFont = p.font.SysFont('Arial', 20, False, False)
     clock = p.time.Clock()
     gs = ChessEngine.GameState()
     validMoves = gs.getValidMoves()
+    screen.fill(BACKGROUND)
     moveMade = False
     animate = False
     load_Images()
@@ -56,15 +64,23 @@ def main():
     gameOver = False
     playerOne = True
     playerTwo = True
+    choiced = False
+    choicedColor = 0
     # AIThinking = False
     # moveFinderProcess = None
     while running:
+
         humanTurn = (gs.whiteToMove and playerOne) or (not gs.whiteToMove and playerTwo)
+        if choiced == False:
+            DrawChossingColor(screen)
         for e in p.event.get():
             if e.type == p.QUIT:
                 running = False
+
             elif e.type == p.MOUSEBUTTONDOWN: # Реализация ходов через клики
                 if not gameOver:
+                    pos = p.mouse.get_pos()
+                    x, y = pos
                     location = p.mouse.get_pos()
                     col = location[0] // SQ_SIZE
                     row = location[1] // SQ_SIZE
@@ -86,6 +102,17 @@ def main():
                                 playerClicks = []
                         if not moveMade:
                             playerClicks = [sqSelected]
+                    if choiced == False:
+                        DrawChossingColor(screen)
+                        if x <= WIDTH // 4 * 3 - 30 and y <= HEIGHT:
+                            print("Выбран цвет: белый")
+                            choiced = True
+                            choicedColor = 1
+                        elif x > WIDTH // 4 * 3 - 30 and y <= HEIGHT:
+                            print("Выбран цвет: черный")
+                            choiced = True
+                            choicedColor = 2
+
             elif e.type == p.KEYDOWN:
                 if e.key == p.K_z:
                     gs.undoMove()
@@ -101,9 +128,20 @@ def main():
                     moveMade = False
                     animate = False
                     gameOver = False
-
+                if e.key == p.K_i:
+                    playerOne = False
+                    playerTwo = False
+                    choiced = True
+                if e.key == p.K_ESCAPE:
+                    running = False
+        if choicedColor == 1:
+            playerOne = True
+            playerTwo = False
+        elif choicedColor == 2:
+            playerOne = False
+            playerTwo = True
         #   ИИ ходы
-        if not gameOver and not humanTurn:
+        if not gameOver and not humanTurn and choiced:
             # if not AIThinking:
             #     AIThinking = True
             #     returnQueue = Queue()
@@ -133,8 +171,8 @@ def main():
             if len(history)>=8:
                 if moveHistory == history[-1] and moveHistory == history[-5] and moveHistory == history[-9]:
                     gs.repeat = True
-
-        DrawGameState(screen, gs, validMoves, sqSelected,moveLogFont)
+        if choiced:
+            DrawGameState(screen, gs, validMoves, sqSelected,moveLogFont)
         if gs.checkMate:
             gameOver = True
             if gs.whiteToMove:
@@ -152,15 +190,32 @@ def main():
         clock.tick(FPS)
         p.display.flip()
 
+def DrawChossingColor(screen):
+    p.draw.rect(screen, BACKGROUND, (0, 0, WIDTH + MOVE_LOG_PANEL_WIDTH, HEIGHT))
+    screen.blit(IMAGESFORSTART["wQ"], p.Rect(0, 50, 0, 0))
+    screen.blit(IMAGESFORSTART["bQ"], p.Rect(WIDTH // 4 * 3 - 30, 50, 0, 0))
+#     screen.fill(BACKGROUND)
+#     bliting(screen, gs)
+#     # DrawBoard(screen)
+#     DrawFont(screen)
+#     drawBoard(screen)
+#     DrawPieces(screen, gs.board)
+#     highlightSquares(screen, gs, validMoves, sqSelected)
+#     drawMoveLog(screen, gs, moveLogFont)
+#     p.draw.rect(screen, BACKGROUND, (0, 0, WIDTH + MOVE_LOG_PANEL_WIDTH, HEIGHT))
+
+
 def DrawGameState(screen, gs,validMoves,sqSelected,moveLogFont):
     bliting(screen, gs)
-    # DrawBoard(screen)
-
     DrawFont(screen)
     drawBoard(screen)
     DrawPieces(screen,gs.board)
     highlightSquares(screen,gs,validMoves,sqSelected)
     drawMoveLog(screen,gs,moveLogFont)
+
+
+    # screen.blit(IMAGESFORSTART["wQ"], p.Rect(0, 50, 0, 0))
+    # screen.blit(IMAGESFORSTART["bQ"], p.Rect(WIDTH // 4 * 3 - 30, 50, 0, 0))
     # pawnPromotionChoice(gs,screen)
 
 def drawBoard(screen):
@@ -170,6 +225,10 @@ def drawBoard(screen):
         for c in range(DIMENSION):
             color = colors[((r+c)%2)]
             p.draw.rect(screen,color,p.Rect(c*SQ_SIZE, r*SQ_SIZE,SQ_SIZE,SQ_SIZE))
+    # p.draw.rect(screen, BACKGROUND, (SQ_SIZE*3, SQ_SIZE * 8 //2,SQ_SIZE*4,SQ_SIZE*2))
+
+
+
 
 def highlightSquares(screen, gs, validMoves, sqSelected):
     if sqSelected != ():
@@ -274,6 +333,7 @@ def bliting(screen, gs):
         (WIN_SIZE[0] - boardSur.get_width()) // 2,
         (WIN_SIZE[1] - boardSur.get_height()) // 2
     ))
+
 
 def animateMove(move, screen, board,clock):
     global colors
